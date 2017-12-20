@@ -35,7 +35,15 @@ def produce_cmd(ref, groupbams, outmetrics, outcram, picard, tmpdir, mem, samtoo
     -T {ref} \\
     -C \\
     -o {outcram} \\
-    -
+    - \\
+    && \\
+    echo "dedup is done" \\
+    && \\
+{samtools} \\
+    index \\
+    {outcram} \\
+    && \\
+    echo "index is done"
     """
     return cmd
 

@@ -32,6 +32,7 @@ def produce_IR(ref, gatk, mem, inbam, outinterval, tmpdir, outcram):
     -R {ref} \\
     -I {inbam} \\
     -targetIntervals {outinterval} \\
+    -allowPotentiallyMisencodedQuals \\
     -o {outcram} \\
     && \\
     echo 'IndelRealigner Done'
@@ -42,8 +43,8 @@ def produce_IR(ref, gatk, mem, inbam, outinterval, tmpdir, outcram):
 @click.option('--outdir', help='输出局部重比后的cram文件路径')
 @click.option('--gatk', help='gatk的路径')
 @click.option('--tmpdir', help='输出临时文件的目录')
-@click.option('--mem', type=float, help='单线程的java启动内存，单位GB，默认4', default=4)
-@click.option('--nt', help='运行RTC时的线程数')
+@click.option('--mem', type=int, help='单线程的java启动内存，单位GB，默认4', default=4)
+@click.option('--nt', type=int, help='运行RTC时的线程数,默认4', default=4)
 @click.argument('inbams', nargs=-1)
 def main(ref, outdir, gatk, tmpdir, mem, nt, inbams):
     for n, inbam in enumerate(inbams, 1):

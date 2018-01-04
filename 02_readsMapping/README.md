@@ -4,6 +4,8 @@
   2. 用 picard 去除 PCR 造成的重复 reads
  
 最终得到比对后的 CRAM 文件，这是一种BAM的压缩格式，在 samtools 给的[基准测试](http://www.htslib.org/benchmarks/CRAM.html)中，CRAM 大小约为 BAM 的一半。
+
+- 注意：目前samtools已更新到1.6，bwa到了0.7.17
 # 01 bwa比对
 [bwa](https://github.com/lh3/bwa) 软件实现了三种比对算法 BWA-backtrack, BWA-SW 和 BWA-MEM。第一种算法适用于长度在 100bp 以下的 reads，后两种算法适用于70bp至数M的长 reads。BWA-MEM 是最新的算法，70bp以上的 reads 用 BWA-MEM 就好，70b p以下的用 BWA-backtrack。
 ## 01.1 bwa-mem

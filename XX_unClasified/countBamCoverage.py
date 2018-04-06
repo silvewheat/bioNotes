@@ -38,12 +38,12 @@ def load_alnfile(alnfile, reffile):
     return smid, aln
 
 
-def count_cov(aln, contig: str, start: int, stop: int):
+def count_cov(aln, contig: str, start: int, stop: int, quality: int):
     """
     start (0-based inclusive)
     stop (0-based inclusive)
     """
-    return np.sum(aln.count_coverage(contig=contig, start=start, stop=stop), axis=0)
+    return np.sum(aln.count_coverage(contig=contig, start=start, stop=stop, quality_threshold=quality), axis=0)
 
 
 
@@ -52,8 +52,9 @@ def count_cov(aln, contig: str, start: int, stop: int):
 @click.option('--reffile', help='输入的参考基因文件,cram文件必须要,bam不用', default=None)
 @click.option('--regionfile', help='需要计算的区域，bed格式')
 @click.option('--cutoff', '-t', help='depth coverage, multiple, 默认1, 3, 5, 7, 10', multiple=True, default=None, type=int)
+@click.option('--quality', help='minimum quality score(in phred) a base has to reach to be counted, default is 0', default=0, type=int)
 @click.option('--outprefix', help='输出结果文件的前缀')
-def main(alnfile, reffile, regionfile, cutoff, outprefix):
+def main(alnfile, reffile, regionfile, cutoff, quality, outprefix):
     """
     \b
     计算regionfile中的coverage
@@ -72,7 +73,7 @@ def main(alnfile, reffile, regionfile, cutoff, outprefix):
             print(contig, start, stop)
             contiglen = stop - start
             totallen += contiglen
-            depths = count_cov(aln, contig, start, stop)
+            depths = count_cov(aln, contig, start, stop, quality)
             nsites = []
             for cutoff in cutoffs:
                 nsite = np.sum(depths >= cutoff)

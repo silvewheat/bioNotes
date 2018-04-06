@@ -23,6 +23,7 @@ def load_dataset(datafile, xcol: str, ycol: str, tags: tuple, groupby):
     if groupby:
         cols.append(groupby)
     df = pd.read_csv(datafile, sep='\t', usecols=cols)
+    print(df.head())
     return df
 
 

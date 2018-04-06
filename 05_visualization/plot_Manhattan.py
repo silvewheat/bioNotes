@@ -29,9 +29,9 @@ def load_allchrom_data(infile, chr_col, loc_col, val_col):
     return df
 
 
-def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, outfile):
+def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, outfile, ticklabelsize, figsize, axlabelsize):
     sns.set_style('white', {'ytick.major.size': 3, 'xtick.major.size': 3})
-    fig, ax = plt.subplots(1, 1, figsize=(20, 5))
+    fig, ax = plt.subplots(1, 1, figsize=figsize)
     loc_offset = 0
     xticks = []
     xticklabels = []
@@ -44,8 +44,8 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
         tmpdf.plot(kind='scatter', x=loc_col, y=val_col, ax=ax, s=6, color=color, marker='o')
         if cutoff:
             ax.hlines(cutoff[chrom], tmpdf[loc_col].values[0], tmpdf[loc_col].values[-1])
-    ax.set_xlabel(xlabel)
-    ax.set_ylabel(ylabel)
+    ax.set_xlabel(xlabel, fontsize=axlabelsize)
+    ax.set_ylabel(ylabel, fontsize=axlabelsize)
     plt.xticks(xticks, xticklabels)
     ax.set_xlim([df[loc_col].values[0], tmpdf[loc_col].values[-1]])
     if ylim:
@@ -60,6 +60,8 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
     else:
         ax.spines['right'].set_visible(False)
         ax.spines['top'].set_visible(False)
+    for label in (ax.get_xticklabels() + ax.get_yticklabels()):
+        label.set_fontsize(ticklabelsize)
     plt.savefig(f'{outfile}', dpi=300)
     plt.close()
 
@@ -76,7 +78,10 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
 @click.option('--invert-yaxis',  is_flag=True, default=False, help='flag, 翻转y轴, 默认不翻转')
 @click.option('--top-xaxis',  is_flag=True, default=False, help='flag, 把x轴置于顶部, 默认在底部')
 @click.option('--cutoff', default=None, help='json格式的cutoff, 脚本cal_norm_isf.py的计算结果')
-def main(infile, chr_col, loc_col, val_col, outfile, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff):
+@click.option('--ticklabelsize', help='刻度文字大小', default=10)
+@click.option('--figsize', nargs=2, type=float, help='图像长宽, 默认20 5', default=(20, 5))
+@click.option('--axlabelsize', help='x轴y轴label文字大小', default=10)
+def main(infile, chr_col, loc_col, val_col, outfile, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, ticklabelsize, figsize, axlabelsize):
     """
     \b
     曼哈顿图
@@ -89,7 +94,7 @@ def main(infile, chr_col, loc_col, val_col, outfile, xlabel, ylabel, ylim, inver
     if cutoff:
         with open(cutoff) as f:
             cutoff = json.load(f)
-    plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, outfile)
+    plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, outfile, ticklabelsize, figsize, axlabelsize)
 
 if __name__ == '__main__':
     main()

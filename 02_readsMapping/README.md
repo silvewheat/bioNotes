@@ -110,6 +110,7 @@ samtools \
     view \
     -T reference.fa \
     -C \
+    -F 4 \
     -o sample1.cram \
     -
 

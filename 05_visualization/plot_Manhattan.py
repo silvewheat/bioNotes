@@ -8,6 +8,7 @@ Created on Mon Jan 15 20:28:05 2018
 import json
 import click
 CONTEXT_SETTINGS = dict(help_option_names=['-h', '--help'])
+import numpy as np
 import pandas as pd
 import matplotlib
 matplotlib.use('Agg')
@@ -16,7 +17,7 @@ import seaborn as sns
 from itertools import cycle
 
 
-def load_allchrom_data(infile, chr_col, loc_col, val_col):
+def load_allchrom_data(infile, chr_col, loc_col, val_col, log_trans, neg_logtrans):
     """
     infile contain several chromosomes
     """
@@ -26,6 +27,10 @@ def load_allchrom_data(infile, chr_col, loc_col, val_col):
                      dtype={chr_col: str,
                             loc_col: float,
                             val_col: float})
+    if log_trans:
+        df.loc[:, val_col] = np.log10(df[val_col].values)
+    elif neg_logtrans:
+        df.loc[:, val_col] = -np.log10(df[val_col].values)
     return df
 
 
@@ -71,6 +76,8 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
 @click.option('--chr-col', help='染色体列名')
 @click.option('--loc-col', help='x轴值列名')
 @click.option('--val-col', help='y轴值列名')
+@click.option('--log-trans', is_flag=True, default=False, help='对val列的值取以10为底的对数')
+@click.option('--neg-logtrans', is_flag=True, default=False, help='对val列的值取以10为底的负对数(画p值)')
 @click.option('--outfile', help='输出文件,根据拓展名判断输出格式')
 @click.option('--xlabel', help='输入散点图x轴标签的名称')
 @click.option('--ylabel', help='输入散点图y轴标签的名称')
@@ -81,7 +88,8 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
 @click.option('--ticklabelsize', help='刻度文字大小', default=10)
 @click.option('--figsize', nargs=2, type=float, help='图像长宽, 默认20 5', default=(20, 5))
 @click.option('--axlabelsize', help='x轴y轴label文字大小', default=10)
-def main(infile, chr_col, loc_col, val_col, outfile, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, ticklabelsize, figsize, axlabelsize):
+def main(infile, chr_col, loc_col, val_col, log_trans, neg_logtrans, outfile,
+         xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, ticklabelsize, figsize, axlabelsize):
     """
     \b
     曼哈顿图
@@ -90,7 +98,7 @@ def main(infile, chr_col, loc_col, val_col, outfile, xlabel, ylabel, ylim, inver
     """
     print(__doc__)
     print(main.__doc__)
-    df = load_allchrom_data(infile, chr_col, loc_col, val_col)
+    df = load_allchrom_data(infile, chr_col, loc_col, val_col, log_trans, neg_logtrans)
     if cutoff:
         with open(cutoff) as f:
             cutoff = json.load(f)

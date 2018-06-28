@@ -22,12 +22,16 @@ def load_bcf2df(bcffile, region=''):
     sw_dict = {r'1|1': 2,
                r'1|0': 1,
                r'0|1': 1,
-               r'0|0': 0}
+               r'0|0': 0,
+               r'1/1': 2,
+               r'0/1': 1,
+               r'0/0': 0,
+               r'./.': np.nan}
     cmd = 'bcftools view %s %s' % (bcffile, region)
     for line in os.popen(cmd):
         if line[0] != '#':
             line = line.strip().split()
-            snp_list.append([sw_dict[x] for x in line[9:]])
+            snp_list.append([sw_dict[x.split(':')[0]] for x in line[9:]])
             index_list.append('%s:%s' % (line[0], line[1]))
         elif line[:6] == '#CHROM':
             name_list = line.strip().split('\t')[9:]
@@ -43,6 +47,17 @@ def load_sample_order(order_file):
                 sample_order_list.append(line)
     return sample_order_list
 
+def filter_af(df, afcutoff):
+    """
+    allele freq
+    过滤掉ALT频率低于cutoff的位点
+    """
+    print(f'filter allele frequence, cutoff is {afcutoff}')
+    print(f'before: {df.shape}')
+    afarray = np.nansum(df.values, axis=1) / np.sum(~np.isnan(df.values), axis=1)
+    newdf = df.loc[afarray>=afcutoff, :]
+    print(f'after: {newdf.shape}')
+    return newdf
 
 def plot(df, outprefix):
     fig, ax = plt.subplots(1, 1, sharex=True, figsize=(30, 10))

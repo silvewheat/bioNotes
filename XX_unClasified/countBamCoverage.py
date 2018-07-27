@@ -67,6 +67,7 @@ def main(alnfile, reffile, regionfile, cutoff, quality, outprefix):
     smid, aln = load_alnfile(alnfile, reffile)
     alldepth = defaultdict(int)
     totallen = 0
+    totaldepth =0
     with open(f'{outprefix}.stats', 'w') as f:
         f.write('contig\tstart\tend\t%s\n' % ('\t'.join([str(x)+'X' for x in cutoffs])))
         for contig, start, stop in regions:
@@ -74,6 +75,7 @@ def main(alnfile, reffile, regionfile, cutoff, quality, outprefix):
             contiglen = stop - start
             totallen += contiglen
             depths = count_cov(aln, contig, start, stop, quality)
+            totaldepth += np.sum(depths)
             nsites = []
             for cutoff in cutoffs:
                 nsite = np.sum(depths >= cutoff)
@@ -83,6 +85,8 @@ def main(alnfile, reffile, regionfile, cutoff, quality, outprefix):
     with open(f'{outprefix}.total', 'w') as f:
         f.write('totallen\t%s\n' % ('\t'.join([str(x)+'X' for x in cutoffs])))
         f.write('%s\t%s\n' % (totallen, '\t'.join([str(alldepth[cutoff]) for cutoff in cutoffs])))
+    with open(f'{outprefix}.meandepth', 'w') as f:
+        f.write(f'{smid}\t{totaldepth/totallen}\n')
 
 
 if __name__ == '__main__':

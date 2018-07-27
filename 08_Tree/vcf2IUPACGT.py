@@ -32,7 +32,7 @@ def query(varfile, sample):
         yield ''.join(bases)
 
 
-def base2file(varfile, sample, outfile):
+def base2file(varfile, sample, region, regions_file, outfile):
     """生成迭代器，每次返回80个碱基和一个\n"""
     if os.path.exists(outfile):
         with open(outfile, 'a') as f:
@@ -40,15 +40,25 @@ def base2file(varfile, sample, outfile):
     else:
         with open(outfile, 'a') as f:
             f.write(f'>{sample}\n')
-    os.system(f"bcftools query -f '[%IUPACGT]' -s {sample} {varfile} | sed 's/\.\/\./N/g' | fold -w80 >> {outfile}")
+    if regions_file:
+        os.system(f"bcftools query -f '[%IUPACGT]' -s {sample} -R {regions_file} {varfile} | sed 's/\.\/\./N/g' | fold -w80 >> {outfile}")
+    elif region:
+        os.system(f"bcftools query -f '[%IUPACGT]' -s {sample} -r {region} {varfile} | sed 's/\.\/\./N/g' | fold -w80 >> {outfile}")
+    else:
+        os.system(f"bcftools query -f '[%IUPACGT]' -s {sample} {varfile} | sed 's/\.\/\./N/g' | fold -w80 >> {outfile}")
 
 
 
 
 @click.command()
 @click.option('--varfile', help='vcf,bcf文件')
+@click.option('--region', help='需要转的区域(如1:1-1000), 默认全部', default=None)
+@click.option('--regions-file', help='区域文件，默认None，覆盖--region', default=None)
 @click.option('--outfile', help='输出fasta文件名')
-def main(varfile, outfile):
+def main(varfile, region, regions_file, outfile):
+    """
+    输入文件不能有indel
+    """
     if os.path.exists(outfile):
         sys.exit('outfile exists!')
     samples = load_samples(varfile)
@@ -57,7 +67,7 @@ def main(varfile, outfile):
         sys.stdout.flush()
         sys.stdout.write(f'{nsample}/{len(samples)} {sample}' + '\r')
         sys.stdout.flush()
-        base2file(varfile, sample, outfile)
+        base2file(varfile, sample, region, regions_file, outfile)
 
 
 # =============================================================================

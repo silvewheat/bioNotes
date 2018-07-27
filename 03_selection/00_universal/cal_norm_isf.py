@@ -49,6 +49,9 @@ def main(infile, chr_col, sepchrom, sexchrom, val_col, outprefix, sperc):
     print(__doc__)
     print(main.__doc__)
     df = load_data(infile, chr_col, val_col)
+    print(f'raw: {df.shape}')
+    df.dropna(inplace=True)
+    print(f'filter NA, {df.shape}')
     chroms = df[chr_col].unique()
     cutoff = {}
     if sexchrom:

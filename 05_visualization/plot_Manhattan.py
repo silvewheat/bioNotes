@@ -35,7 +35,9 @@ def load_allchrom_data(infile, chr_col, loc_col, val_col, log_trans, neg_logtran
     return df
 
 
-def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, highlight, outfile, ticklabelsize, figsize, axlabelsize, markersize, fill_regions):
+def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff,
+         highlight, outfile, ticklabelsize, figsize, axlabelsize, markersize, fill_regions,
+         windowsize):
     sns.set_style('white', {'ytick.major.size': 3, 'xtick.major.size': 3})
     fig, ax = plt.subplots(1, 1, figsize=figsize)
 #    offsets = {}
@@ -77,6 +79,12 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
                     # region: list [float, float]
                     ax.fill_between(region, y1, y2, color='grey', alpha=0.6)
 
+        # plot mean value line
+        if windowsize:
+            tmpdf['window_index'] = tmpdf[loc_col] // windowsize
+            tmpdf.groupby('window_index').agg({loc_col: np.median,
+                                            val_col: np.median}).plot(x=loc_col, y=val_col, kind='line', ax=ax)
+
 
         loc_offset = tmpdf[loc_col].values[-1] # assume loc is sorted
     ax.set_xlabel(xlabel, fontsize=axlabelsize)
@@ -84,7 +92,6 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
     plt.xticks(xticks, xticklabels)
     plt.subplots_adjust(left=0.05, right=0.99)
     ax.set_xlim([df[loc_col].values[0], tmpdf[loc_col].values[-1]])
-
 
     # adjust ylim
     if ylim:
@@ -105,6 +112,9 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
     # adjust font size
     for label in (ax.get_xticklabels() + ax.get_yticklabels()):
         label.set_fontsize(ticklabelsize)
+
+    # hide legend
+    ax.legend().set_visible(False)
     plt.savefig(f'{outfile}', dpi=300)
     plt.close()
 
@@ -130,9 +140,10 @@ def plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_
 @click.option('--markersize', default=6, help='散点大小, default is 6', type=float)
 @click.option('--chroms', default=None, help='只用这些染色体,e.g --chr 6 --chr X will only plot chr6 and chrX.', multiple=True)
 @click.option('--fill-regions', default=None, help='fill between regions in this <bed file> (no header)')
+@click.option('--windowsize', default=None, help='draw mean value in a specific window size', type=int)
 def main(infile, chr_col, loc_col, val_col, log_trans, neg_logtrans, outfile,
          xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff, highlight, ticklabelsize,
-         figsize, axlabelsize, markersize, chroms, fill_regions):
+         figsize, axlabelsize, markersize, chroms, fill_regions, windowsize):
     """
     \b
     曼哈顿图
@@ -155,7 +166,7 @@ def main(infile, chr_col, loc_col, val_col, log_trans, neg_logtrans, outfile,
         with open(cutoff) as f:
             cutoff = json.load(f)
     plot(df, chr_col, loc_col, val_col, xlabel, ylabel, ylim, invert_yaxis, top_xaxis, cutoff,
-         highlight, outfile, ticklabelsize, figsize, axlabelsize, markersize, fill_regions)
+         highlight, outfile, ticklabelsize, figsize, axlabelsize, markersize, fill_regions, windowsize)
 
 if __name__ == '__main__':
     main()

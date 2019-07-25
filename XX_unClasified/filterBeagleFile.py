@@ -63,7 +63,7 @@ def main(beaglefile, sites, samples, rmtansi, chuncksize, outfile):
             if samples:
                 chunk = chunk.loc[:, usecols]
             if rmtansi:
-                chunk = chunk.loc[np.fabs(chunk[1] - chunk[2])==2, :]
+                chunk = chunk.loc[np.fabs(chunk[1] - chunk[2])!=2, :]
             chunk.to_csv(outfile, sep='\t', index=False, header=False, compression='gzip', mode='ab')
         except StopIteration:
             loop = False

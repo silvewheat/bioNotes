@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Mon Dec 11 11:12:38 2017
-
 @author: Caiyd
 """
 
@@ -56,14 +55,18 @@ echo "sampe is done"
 def split_sepe(fastqs):
     fastqs = list(fastqs)
     fastqs.sort()
+    print(fastqs)
     sefiles = []
     pefiles = []
     for fastq in fastqs:
-        basename, suffix = fastq.split('.', 1)
+        path, file = os.path.split(fastq)
+        basename, suffix = file.split('.', 1)
+        print(basename, suffix)
+        print(basename[:-2])
         if basename[-2:] == '_1':
-            if (basename[:-2] + '_2.' + suffix) in fastqs: # 如果有对应_1的_2
+            if (os.path.join(path, basename[:-2] + '_2.' + suffix)) in fastqs: # 如果有对应_1的_2
                 pefiles.append(fastq)
-                pefiles.append(basename[:-2] + '_2.' + suffix)
+                pefiles.append(os.path.join(path, basename[:-2] + '_2.' + suffix))
         elif basename[-2:] == '_2':
             if fastq not in pefiles: # fastqs拍过序，如果是成对的，_1一定在_2之前， 这会儿还没存就是单端了
                 sefiles.append(fastq)
@@ -82,6 +85,7 @@ def split_sepe(fastqs):
 @click.option('--nt', help='线程数', default=4)
 @click.argument('infastqs', nargs=-1)
 def main(ref, outdir, bwa, samtools, outfmt, pl, nt, infastqs):
+    "python produce_bwa_mem.py [options] /home/data/*.fq.gz"
     sefiles, pefiles = split_sepe(infastqs)
     for nfile, infastq in enumerate(sefiles, 1):
         basename = os.path.basename(infastq).split('.')[0]
@@ -108,4 +112,3 @@ def main(ref, outdir, bwa, samtools, outfmt, pl, nt, infastqs):
 
 if __name__ == '__main__':
     main()
-

@@ -48,7 +48,7 @@ samtools \
 ```
 其中-t指定线程数，-l 1024意味着禁用种子。
 单端测序的reads只生成一个.sai文件，双端测序_1和_2的reads分别生成对应的.sai文件。
-produce_bwa_aln.py可用于批量生成bwa aln的shell脚本。
+produce_bwa_aln.py可用于批量生成bwa aln的shell脚本。(python produce_bwa_aln.py --help会显示参数及用法)
 ### bwa samse
 单端测序的reads经过bwa aln得到的.sai文件作为bwa samse的输出文件，生成最终的比对结果文件。
 ```

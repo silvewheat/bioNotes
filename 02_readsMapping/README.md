@@ -33,7 +33,7 @@ samtools \
 2. 通常来说，这步得到的文件还需要使用 picard 去除 PCR 重复，如果后续不使用 picard 去重（或者只使用 samtools 去重） 的话，这一步可以直接生成 cram 文件，即把 --output-fmt BAM 改为 CRAM ，同时把 -o 的文件名后缀改为.cram
 3. picard去重复不需要对BAM文件建索引，所以如果后续还要去重的话，就不需要对这步的结果建索引。
 4. 这里使用了samtools fixmate来修复一些bwa直接输出的FLAG（以更好地兼容下游软件）。
-5. 可使用脚本produce_bwa_mem.py批量生成bwa mem的shell脚本，要求fasta的文件名格式形如sample1_library1_lane1_1.clean.fq.gz
+5. 可使用脚本produce_bwa_mem.py批量生成bwa mem的shell脚本，要求fasta的文件名格式形如sample1_library1_lane1_1.clean.fq.gz (python produce_bwa_mem.py --help会显示参数及用法)
 ## 01.2 bwa-backtrack
 如果使用bwa backtrack比对需要两步，第一步的命令是bwa aln，第二步有两种，单端测序用bwa samse，双端测序用bwa sampe
 ### bwa aln
